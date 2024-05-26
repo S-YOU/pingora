@@ -376,12 +376,12 @@ impl HttpSession {
             header.insert_header(header::DATE, date::get_cached_date())?;
 
             // TODO: make these lazy static
-            let connection_value = if self.will_keepalive() {
-                "keep-alive"
-            } else {
-                "close"
-            };
-            header.insert_header(header::CONNECTION, connection_value)?;
+            // let connection_value = if self.will_keepalive() {
+            //     "keep-alive"
+            // } else {
+            //     "close"
+            // };
+            // header.insert_header(header::CONNECTION, connection_value)?;
         }
 
         if header.status.as_u16() == 101 {

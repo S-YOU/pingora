@@ -102,7 +102,7 @@ curl http://127.0.0.1:6150
 "#;
 
 pub fn main() {
-    env_logger::init();
+    // env_logger::init();
 
     print!("{USAGE}");
 
@@ -110,53 +110,53 @@ pub fn main() {
     let mut my_server = Server::new(opt).unwrap();
     my_server.bootstrap();
 
-    let cert_path = format!("{}/tests/keys/server.crt", env!("CARGO_MANIFEST_DIR"));
-    let key_path = format!("{}/tests/keys/key.pem", env!("CARGO_MANIFEST_DIR"));
+    // let cert_path = format!("{}/tests/keys/server.crt", env!("CARGO_MANIFEST_DIR"));
+    // let key_path = format!("{}/tests/keys/key.pem", env!("CARGO_MANIFEST_DIR"));
 
-    let mut echo_service = service::echo::echo_service();
-    echo_service.add_tcp("127.0.0.1:6142");
-    echo_service
-        .add_tls("0.0.0.0:6143", &cert_path, &key_path)
-        .unwrap();
+    // let mut echo_service = service::echo::echo_service();
+    // echo_service.add_tcp("127.0.0.1:6142");
+    // echo_service
+    //     .add_tls("0.0.0.0:6143", &cert_path, &key_path)
+    //     .unwrap();
 
     let mut echo_service_http = service::echo::echo_service_http();
     echo_service_http.add_tcp("0.0.0.0:6145");
-    echo_service_http.add_uds("/tmp/echo.sock", None);
+    // echo_service_http.add_uds("/tmp/echo.sock", None);
 
-    let dynamic_cert = DynamicCert::new(&cert_path, &key_path);
-    let mut tls_settings = pingora::listeners::TlsSettings::with_callbacks(dynamic_cert).unwrap();
+    // let dynamic_cert = DynamicCert::new(&cert_path, &key_path);
+    // let mut tls_settings = pingora::listeners::TlsSettings::with_callbacks(dynamic_cert).unwrap();
     // by default intermediate supports both TLS 1.2 and 1.3. We force to tls 1.2 just for the demo
-    tls_settings
-        .set_max_proto_version(Some(pingora::tls::ssl::SslVersion::TLS1_2))
-        .unwrap();
-    tls_settings.enable_h2();
-    echo_service_http.add_tls_with_settings("0.0.0.0:6148", None, tls_settings);
+    // tls_settings
+    //     .set_max_proto_version(Some(pingora::tls::ssl::SslVersion::TLS1_2))
+    //     .unwrap();
+    // tls_settings.enable_h2();
+    // echo_service_http.add_tls_with_settings("0.0.0.0:6148", None, tls_settings);
 
     let proxy_service = service::proxy::proxy_service(
         "0.0.0.0:6141", // listen
-        "1.1.1.1:80",   // proxy to
+        "127.0.0.1:9090",   // proxy to
     );
 
-    let proxy_service_ssl = service::proxy::proxy_service_tls(
-        "0.0.0.0:6144",    // listen
-        "1.1.1.1:443",     // proxy to
-        "one.one.one.one", // SNI
-        &cert_path,
-        &key_path,
-    );
+    // let proxy_service_ssl = service::proxy::proxy_service_tls(
+    //     "0.0.0.0:6144",    // listen
+    //     "1.1.1.1:443",     // proxy to
+    //     "one.one.one.one", // SNI
+    //     &cert_path,
+    //     &key_path,
+    // );
 
-    let mut prometheus_service_http = ListeningService::prometheus_http_service();
-    prometheus_service_http.add_tcp("127.0.0.1:6150");
+    // let mut prometheus_service_http = ListeningService::prometheus_http_service();
+    // prometheus_service_http.add_tcp("127.0.0.1:6150");
 
-    let background_service = background_service("example", ExampleBackgroundService {});
+    // let background_service = background_service("example", ExampleBackgroundService {});
 
     let services: Vec<Box<dyn Service>> = vec![
-        Box::new(echo_service),
+        // Box::new(echo_service),
         Box::new(echo_service_http),
         Box::new(proxy_service),
-        Box::new(proxy_service_ssl),
-        Box::new(prometheus_service_http),
-        Box::new(background_service),
+        // Box::new(proxy_service_ssl),
+        // Box::new(prometheus_service_http),
+        // Box::new(background_service),
     ];
     my_server.add_services(services);
     my_server.run_forever();

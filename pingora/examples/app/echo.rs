@@ -60,29 +60,12 @@ pub struct HttpEchoApp;
 #[async_trait]
 impl ServeHttp for HttpEchoApp {
     async fn response(&self, http_stream: &mut ServerSession) -> Response<Vec<u8>> {
-        REQ_COUNTER.inc();
-        // read timeout of 2s
-        let read_timeout = 2000;
-        let body = match timeout(
-            Duration::from_millis(read_timeout),
-            http_stream.read_request_body(),
-        )
-        .await
-        {
-            Ok(res) => match res.unwrap() {
-                Some(bytes) => bytes,
-                None => Bytes::from("no body!"),
-            },
-            Err(_) => {
-                panic!("Timed out after {:?}ms", read_timeout);
-            }
-        };
+        let bytes = Bytes::from("Hello, World!");
 
         Response::builder()
             .status(StatusCode::OK)
-            .header(http::header::CONTENT_TYPE, "text/html")
-            .header(http::header::CONTENT_LENGTH, body.len())
-            .body(body.to_vec())
+            .header(http::header::CONTENT_LENGTH, bytes.len())
+            .body(bytes.to_vec())
             .unwrap()
     }
 }
